@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 from re import S
 from telnetlib import STATUS
 from this import d
@@ -15,9 +16,9 @@ DATABASE_URL = 'postgres://mhaezgysmzajom:54bdabe172ddbafee73bb9f9655955b60e5e31
 @app.route('/', methods=['GET', 'POST']) #base root
 def home_page():    
     # return redirect('/adminlogin')
-    return render_template('login.html')
+    return render_template('login part 2.html')
 
-@app.route('/LoginSubmit', methods=['POST'])
+@app.route('/LoginSubmit', methods=['POST','GET'])
 def logInSubmit():
     if request.method == "POST":      
         emailid = request.form.get("email")
@@ -33,7 +34,7 @@ def logInSubmit():
             cur.close()
             conn.close()
             if(data[0][4]==password):
-                print("passowed")
+                # print("passowed")
                 # print("data[0][6]",data[0][6])
                 if(data[0][6] == "admin"):
                     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -79,10 +80,10 @@ def logInSubmit():
                         return render_template('user.html' ,name = data[0][1])
             else:
                 print("encorrect pass")
-                return render_template('login.html')
+                return render_template('login part 2.html')
         except:
             print("pass")
-            return render_template('login.html')
+            return render_template('login part 2.html')
 
 @app.route('/validemail', methods=['POST','GET'])   #login
 def validemail():
@@ -117,15 +118,14 @@ def CheakUserName():
         if(len(data) == 1):
             return "email exist"
         else:
-            return "chek"
-
+            return "check"
 
 @app.route('/signUpSubmit', methods=['POST'])
 def signUpSubmit():
     try:
         if request.method == "POST":    
             name = request.form.get("ck")  
-            if(str(name) == "chek"):
+            if(str(name) == "check"):
                 add = request.form.get("fname")
                 full_name = request.form.get("lname")
                 emailaddr = request.form.get("email")
@@ -142,18 +142,18 @@ def signUpSubmit():
                     conn.commit()
                     cur.close()
                     conn.close() 
-                    return render_template('login.html')
+                    return render_template('login 2 part.html')
                 else:
-                    return render_template('signup.html')
+                    return render_template('reg - part 2.html')
             else:
-                return render_template('signup.html')
+                return render_template('reg - part 2.html')
     except:
         print("step3")
-        return render_template('signup.html')
+        return render_template('reg - part 2.html')
 
 @app.route("/ne")
 def secret():
-    return render_template("signup.html")
+    return render_template("reg - part 2.html")
 
 @app.route("/home")
 def home():
@@ -193,13 +193,22 @@ def accessasignsub():
 def addroomsubmit():
     rid =    request.form.get("rid")
     espid =  request.form.get("espid")
+    ac1name = "Ac1"
+    ac2name = "Ac2"
+    try:
+        if(len(request.form.get("ac1name")) >= 1):
+            ac1name = request.form.get("ac1name")
+        if(len(request.form.get("ac2name")) >= 1):
+            ac2name = request.form.get("ac2name")
+    except:
+        pass
     # name = request.form.get("ck")
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     conn
     cur = conn.cursor()
-    cur.execute('INSERT INTO roomdata (rid, espid, ac1, lock1, ac2, lock2)'
-                'VALUES (%s, %s,%s, %s, %s, %s)',
-                (rid, espid,0, 0,0,0))
+    cur.execute('INSERT INTO roomdata (rid, espid, ac1, lock1, ac2, lock2,ac1name,ac2name)'
+                'VALUES (%s, %s,%s, %s, %s, %s, %s, %s)',
+                (rid, espid,0, 0,0,0,ac1name,ac2name))
     cur.execute('INSERT INTO roomstatus (rid, espid, ac1, ac2)'
                 'VALUES (%s, %s,%s, %s)',
                 (rid, espid,0, 0))    
@@ -214,6 +223,20 @@ def addroomsubmit():
 def addroom():
     return render_template('addroom.html')
 
+@app.route('/deleteRoom', methods=['POST','GET'])   #login
+def deleteRoom():
+    roomid = (request.json['rid'])
+    name = (request.json['name'])
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    conn
+    cur = conn.cursor()
+    sql = "DELETE FROM roomdata WHERE rid = %s"
+    var = (roomid,)
+    cur.execute(sql,var)
+    conn.commit()
+    cur.close()
+    conn.close()
+    return redirect('/adminlogin')
 
 
 @app.route("/cheakbox", methods=['POST','GET'])
@@ -287,7 +310,7 @@ def logs():
     return render_template('log.html',data = data[::-1])
 
 
-@app.route('/adminlogin')
+@app.route('/adminlogin',methods=['GET','POST'])
 def adminlogin():
     # name = request.args.get('name')
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -396,7 +419,7 @@ def espac():
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cur = conn.cursor()
         print("name",name)
-        sql = "SELECT * FROM roomstatus WHERE rid = %s"
+        sql = "SELECT * FROM roomstatus WHERE espid = %s"
         var = (name, )
         cur.execute(sql,var)
         data = (cur.fetchall())
@@ -482,7 +505,7 @@ def online():
             if(nowmin-lmin < 2 ):
                 return "online"
             else:
-                return "ofline"
+                return "offline"
         else:
             return "offline"        
     except:
@@ -496,5 +519,5 @@ if __name__ == '__main__':
     # db.switch.drop()
     app.jinja_env.auto_reload = True
     app.config['TEMPLATES_AUTO_RELOAD'] = True
-    app.run(host='0.0.0.0', port=81)
+    app.run()
         
