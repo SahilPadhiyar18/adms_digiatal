@@ -235,9 +235,10 @@ def cheakbox():
         te = str(temp[0][0])+" "+str(x[1])+" is on"
     else:
         te = str(temp[0][0])+" "+str(x[1])+" is off"
-    cur.execute('INSERT INTO logs (log, method)'    
-                'VALUES (%s, %s)',
-                (te, nam,))
+    now = datetime.now()    
+    cur.execute('INSERT INTO logs (log, method, datetime)'    
+                'VALUES (%s, %s, %s)',
+                (te, nam,now,))
 
     if(str(x[1])=="ac1" or str(x[1])=="ac2"):
         s = "UPDATE roomstatus SET "
