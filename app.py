@@ -432,10 +432,11 @@ def espac():
         var = (name, )
         cur.execute(sql,var)
         data = (cur.fetchall())
-        if(ac1c>1 or ac2c>1):
-           cur.execute('INSERT INTO accurrent (rid, ac1, ac2, time)'
+        if(int(ac1c)>1 or int(ac2c)>1):
+               cur.execute('INSERT INTO accurrent (rid, ac1, ac2, time)'
                        'VALUES (%s, %s,%s, %s)',
                        (name, ac1c,ac2c, now))   
+                      
         conn.commit()
         if(len(data)<0):
             rpl = "name mismatch"
