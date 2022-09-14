@@ -430,10 +430,11 @@ def espac():
         sql = "SELECT * FROM roomstatus WHERE rid = %s"
         var = (name, )
         cur.execute(sql,var)
+        data = (cur.fetchall())
         cur.execute('INSERT INTO accurrent (rid, ac1, ac2, time)'
             'VALUES (%s, %s,%s, %s)',
-            (name, ac1c,ac2c, now))
-        data = (cur.fetchall())
+            (name, ac1c,ac2c, now))   
+        conn.commit()
         if(len(data)<0):
             rpl = "name mismatch"
         else:
