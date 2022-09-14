@@ -221,14 +221,9 @@ def cheakbox():
     swa = (request.json['sw'])
     stat = (request.json['data'])
     nam = (request.json['name'])
-    # print(swa,stat,nam)
     x = swa.split("_")
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cur = conn.cursor()
-    roomno = int(x[0])
-    cur.execute('SELECT rid,ac1name,ac2name FROM roomdata where id = %s;',(int(x[0]),))
-    roomdata = cur.fetchall()
-    # print(roomdata)
     s = "UPDATE roomdata SET "
     ql = "=%s WHERE id = %s"
     sql = s + str(x[1]) + ql 
@@ -240,9 +235,6 @@ def cheakbox():
         te = str(temp[0][0])+" "+str(x[1])+" is on"
     else:
         te = str(temp[0][0])+" "+str(x[1])+" is off"
-    cur.execute('SELECT rid,ac1name,ac2name FROM roomdata where id = %s;',(int(x[0]),))
-    acd = cur.fetchall()   
-    
     now = datetime.now()    
     cur.execute('INSERT INTO logs (log, method, datetime)'    
                 'VALUES (%s, %s, %s)',
@@ -252,32 +244,13 @@ def cheakbox():
         s = "UPDATE roomstatus SET "
         ql = "=%s WHERE rid = %s"
         sql = s + str(x[1]) + ql 
-        # print(str(temp[0][0]))
+        print(str(temp[0][0]))
         adr = (int(stat),str(temp[0][0]),)
         cur.execute(sql,adr)
-    if(stat == 1):
-        if(str(x[1])=="ac1"):
-            cur.execute('INSERT INTO acdata (rid, acname, onby, ontime)'
-                'VALUES (%s, %s,%s, %s)',
-                (roomdata[0][0],roomdata[0][1] ,nam, now))
-        elif(str((x[1]))=="ac2"):
-            cur.execute('INSERT INTO acdata (rid, acname, onby, ontime)'
-                'VALUES (%s, %s,%s, %s)',
-                (roomdata[0][0],roomdata[0][2] ,nam, now))
-        # print("on")
-    elif(stat == 0):
-        cur.execute('SELECT id,ontime FROM acdata where rid = %s and offby is null;',(roomdata[0][0],))
-        temp = cur.fetchall()
-        sql = "UPDATE acdata SET offby = %s, offtime =%s,totaltime= %s WHERE id = %s"
-        adr = (nam,now,str(now-temp[0][1]),temp[0][0])
-        cur.execute(sql,adr)
-
-        # print('sahil',temp)
     conn.commit()
     cur.close()
     conn.close()
     return "ok"
-
 
 
 @app.route('/logininfo', methods=['GET', 'POST']) 
@@ -421,10 +394,6 @@ def temp1():
 def espac():
     try:      
         name = str(request.args.get('name'))
-        
-        ac1c = request.args.get('ac1c')
-        ac2c = request.args.get('ac2c')
-        now = datetime.now()
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cur = conn.cursor()
         print("name",name)
@@ -432,8 +401,6 @@ def espac():
         var = (name, )
         cur.execute(sql,var)
         data = (cur.fetchall())
-        cur.execute(('UPDATE accurrent SET ac1 = %s,ac2 = %s,time = %s WHERE rid = %s'),(ac1c,ac2c,now,name))
-        conn.commit()
         if(len(data)<0):
             rpl = "name mismatch"
         else:
@@ -448,18 +415,6 @@ def espac():
     except:
         rpl = "name mismatch"
     return str(rpl)
-
-@app.route("/acdatalog")
-def acdatalog():
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-    cur = conn.cursor()
-    cur.execute('SELECT * FROM acdata;')
-    data = cur.fetchall()
-    cur.close()
-    conn.close()
-    print(data)
-    data.sort()
-    return render_template('acdatalog.html',data = data[::-1])
 
 @app.route('/sched', methods=['GET','POST'])
 def sched():
