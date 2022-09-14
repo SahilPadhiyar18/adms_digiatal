@@ -421,6 +421,7 @@ def temp1():
 def espac():
     try:      
         name = str(request.args.get('name'))
+        
         ac1c = request.args.get('ac1c')
         ac2c = request.args.get('ac2c')
         now = datetime.now()
@@ -431,9 +432,10 @@ def espac():
         var = (name, )
         cur.execute(sql,var)
         data = (cur.fetchall())
-        cur.execute('INSERT INTO accurrent (rid, ac1, ac2, time)'
-            'VALUES (%s, %s,%s, %s)',
-            (name, ac1c,ac2c, now))   
+        if(ac1c>1 or ac2c>1):
+           cur.execute('INSERT INTO accurrent (rid, ac1, ac2, time)'
+                       'VALUES (%s, %s,%s, %s)',
+                       (name, ac1c,ac2c, now))   
         conn.commit()
         if(len(data)<0):
             rpl = "name mismatch"
