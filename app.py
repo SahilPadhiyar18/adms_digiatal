@@ -424,15 +424,15 @@ def espac():
         ac1c = request.args.get('ac1c')
         ac2c = request.args.get('ac2c')
         now = datetime.now()
-        cur.execute('INSERT INTO accurrent (rid, ac1, ac2, time)'
-            'VALUES (%s, %s,%s, %s)',
-            (name, ac1c,ac2c, now))
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cur = conn.cursor()
         print("name",name)
         sql = "SELECT * FROM roomstatus WHERE rid = %s"
         var = (name, )
         cur.execute(sql,var)
+        cur.execute('INSERT INTO accurrent (rid, ac1, ac2, time)'
+            'VALUES (%s, %s,%s, %s)',
+            (name, ac1c,ac2c, now))
         data = (cur.fetchall())
         if(len(data)<0):
             rpl = "name mismatch"
