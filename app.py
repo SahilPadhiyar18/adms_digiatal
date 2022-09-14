@@ -432,7 +432,7 @@ def espac():
         var = (name, )
         cur.execute(sql,var)
         data = (cur.fetchall())
-        cur.execute(('UPDATE accurrent SET ac1 = %s,ac2 = %s,time = %s WHERE rid = %s'),(2.5,7.8,now,"iot001"))
+        cur.execute(('UPDATE accurrent SET ac1 = %s,ac2 = %s,time = %s WHERE rid = %s'),(ac1c,ac2c,now,name))
         conn.commit()
         if(len(data)<0):
             rpl = "name mismatch"
